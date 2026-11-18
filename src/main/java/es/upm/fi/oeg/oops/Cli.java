@@ -37,6 +37,10 @@ public class Cli implements Callable<Integer> {
     @Option(names = { "--iri", "--ontology-url" }, description = "IRI/URL to RDF/OWL ontology (HTTP)")
     private URL namespace;
 
+    @Option(names = { "--out", "--output",
+            "-o" }, description = "Path to write the RDF/XML pitfall report to")
+    private Path out;
+
     // @Option(names = {"-a", "--algorithm"}, description = "MD5, SHA-1, SHA-256, ...")
     // private String algorithm = "SHA-256";
 
@@ -65,8 +69,11 @@ public class Cli implements Callable<Integer> {
         final Linter executor = new Linter();
         logger.info("Checkers supplied: " + checkers.size());
         final Report report = executor.partialExecution(srcModel, Collections.emptyList(), checkers);
-        // Files.write(Path.of("tstOut.owl.xml"), report.getXmlOutput().getBytes());
-        report.getOutputModel().write(Files.newOutputStream(Path.of("tstOut.model.ttl")), "Turtle");
+        if (out != null) {
+            report.getOutputModel().write(Files.newOutputStream(out), "RDF/XML");
+        } else {
+            report.getOutputModel().write(Files.newOutputStream(Path.of("tstOut.model.ttl")), "Turtle");
+        }
 
         return 0;
     }
